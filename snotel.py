@@ -3,7 +3,6 @@
 from datetime import datetime, timedelta
 from requests import Session
 from zeep import Client
-from zeep.exceptions import Fault
 from zeep.transports import Transport
 
 """URI for the AWDB Web Service
