@@ -13,5 +13,5 @@ pip install -r requirements.txt
 Then run the development server with: 
 
 ```
-FLASK_APP=app.py flask run
+FLASK_APP=app.py FLASK_DEBUG=1 flask run
 ```
