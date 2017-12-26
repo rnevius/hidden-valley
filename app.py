@@ -6,4 +6,4 @@ snotels = Snotel()
 
 @app.route('/')
 def index():
-    return render_template('index.html', snow_depth=snotels.get_range_for_stations())
+    return render_template('index.html', snow_depth=snotels.get_snow_depth_range())

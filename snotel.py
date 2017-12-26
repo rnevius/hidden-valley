@@ -26,40 +26,9 @@ class Snotel(object):
         self.client = Client(AWDB_URI, transport=transport)
        
         self.stations = stations
-    
-    def get_range_for_stations(self):
-        snow_depths = [self.get_likely_snow_depth(station) for station in self.get_data()]
-        min_depth = min(snow_depths)
-        max_depth = max(snow_depths)
 
-        if min_depth == max_depth:
-            return '{}"'.format(min_depth)
-
-        return '{}" - {}"'.format(min_depth, max_depth)
-
-    def get_likely_snow_depth(self, station):
-        """
-        SNOTEL readings wobble.
-        This method aims to provide a more accurate value for snow depth for a single station.
-        """
-        readings = [measurement.value for measurement in station.values]
-        if not readings:
-            raise ValueError('Station out of order.')
-        
-        if len(readings) < 3:
-            return readings[-1]
-
-        return max(readings[-3:])
-
-    def get_metadata(self):
-        """Retrieves station metadata for one or more stations in a single call."""
-        if isinstance(self.stations, str):
-            return self.client.service.getStationMetadata(self.stations)
-        
-        return self.client.service.getStationMetadataMultiple(self.stations)
-            
     def get_data(self):
-        """Gets instantaneous snow depth data for one or more stations"""
+        """Gets instantaneous snow depth data for one or more stations."""
 
         begin_date = datetime.now() - timedelta(days=2)
         begin_date_str = begin_date.strftime('%Y-%m-%d')
@@ -82,3 +51,35 @@ class Snotel(object):
             ]
 
         return snow_depth_data
+    
+    def get_likely_snow_depth(self, station):
+        """
+        SNOTEL readings wobble.
+        This method aims to provide a more accurate value for snow depth for a single station.
+        """
+        readings = [measurement.value for measurement in station.values]
+        if not readings:
+            raise ValueError('Station out of order.')
+        
+        if len(readings) < 3:
+            return readings[-1]
+
+        return max(readings[-3:])
+
+    def get_metadata(self):
+        """Retrieves station metadata for one or more stations in a single call."""
+        if isinstance(self.stations, str):
+            return self.client.service.getStationMetadata(self.stations)
+        
+        return self.client.service.getStationMetadataMultiple(self.stations)
+            
+    def get_snow_depth_range(self):
+        """Return the range of current depths between stations."""
+        snow_depths = [self.get_likely_snow_depth(station) for station in self.get_data()]
+        min_depth = min(snow_depths)
+        max_depth = max(snow_depths)
+
+        if min_depth == max_depth:
+            return '{}"'.format(min_depth)
+
+        return '{}" - {}"'.format(min_depth, max_depth)
