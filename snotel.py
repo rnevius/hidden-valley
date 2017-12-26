@@ -1,30 +1,34 @@
+"""Return useful data from any number of SNOTEL stations."""
+
 from datetime import datetime, timedelta
 from requests import Session
 from zeep import Client
-from zeep.transports import Transport 
+from zeep.transports import Transport
 
-"""
-URI for the AWDB Web Service
+"""URI for the AWDB Web Service
 
 See https://www.wcc.nrcs.usda.gov/web_service/AWDB_Web_Service_Reference.htm
-for a complete reference, provided by the National Water and Climate Center (NWCC)
-"""
+for a complete reference, provided by the National Water and Climate Center (NWCC)"""
 AWDB_URI = 'https://www.wcc.nrcs.usda.gov/awdbWebService/services?WSDL'
 
-STATIONS = [
+STATIONS = (
     '322:CO:SNTL',  # Bear Lake
     '870:CO:SNTL',  # Willow Park
     # '1042:CO:SNTL', # Wild Basin
-]
+)
 
 class Snotel(object):
+    """
+    Take a tuple of stations (as three-part strings)
+    and use it to return useful snow depth and station data.
+    """
 
     def __init__(self, stations=STATIONS):
         self.session = Session()
         self.session.verify = False
         transport = Transport(session=self.session)
         self.client = Client(AWDB_URI, transport=transport)
-       
+
         self.stations = stations
 
     def get_data(self):
@@ -51,7 +55,7 @@ class Snotel(object):
             ]
 
         return snow_depth_data
-    
+
     def get_likely_snow_depth(self, station):
         """
         SNOTEL readings wobble.
@@ -60,7 +64,7 @@ class Snotel(object):
         readings = [measurement.value for measurement in station.values]
         if not readings:
             raise ValueError('Station out of order.')
-        
+
         if len(readings) < 3:
             return readings[-1]
 
@@ -70,9 +74,9 @@ class Snotel(object):
         """Retrieves station metadata for one or more stations in a single call."""
         if isinstance(self.stations, str):
             return self.client.service.getStationMetadata(self.stations)
-        
+
         return self.client.service.getStationMetadataMultiple(self.stations)
-            
+
     def get_snow_depth_range(self):
         """Return the range of current depths between stations."""
         snow_depths = [self.get_likely_snow_depth(station) for station in self.get_data()]

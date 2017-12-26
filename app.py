@@ -1,4 +1,3 @@
-from datetime import datetime
 from flask import Flask, render_template
 from snotel import Snotel
 app = Flask(__name__)
