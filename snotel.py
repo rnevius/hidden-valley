@@ -29,7 +29,13 @@ class Snotel(object):
     
     def get_range_for_stations(self):
         snow_depths = [self.get_likely_snow_depth(station) for station in self.get_data()]
-        return '{}" - {}"'.format(min(snow_depths), max(snow_depths))
+        min_depth = min(snow_depths)
+        max_depth = max(snow_depths)
+
+        if min_depth == max_depth:
+            return '{}"'.format(min_depth)
+
+        return '{}" - {}"'.format(min_depth, max_depth)
 
     def get_likely_snow_depth(self, station):
         """
