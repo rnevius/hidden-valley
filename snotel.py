@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta
 from requests import Session
 from zeep import Client
+from zeep.exceptions import Fault
 from zeep.transports import Transport
 
 """URI for the AWDB Web Service
@@ -11,19 +12,16 @@ See https://www.wcc.nrcs.usda.gov/web_service/AWDB_Web_Service_Reference.htm
 for a complete reference, provided by the National Water and Climate Center (NWCC)"""
 AWDB_URI = 'https://www.wcc.nrcs.usda.gov/awdbWebService/services?WSDL'
 
-STATIONS = (
-    '322:CO:SNTL',  # Bear Lake
-    '870:CO:SNTL',  # Willow Park
-    # '1042:CO:SNTL', # Wild Basin
-)
-
 class Snotel(object):
     """
     Take a tuple of stations (as three-part strings)
     and use it to return useful snow depth and station data.
     """
 
-    def __init__(self, stations=STATIONS):
+    def __init__(self, stations=None):
+        if not isinstance(stations, list):
+            raise TypeError('stations must be a list')
+
         self.session = Session()
         self.session.verify = False
         transport = Transport(session=self.session)
